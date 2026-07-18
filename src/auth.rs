@@ -193,17 +193,15 @@ pub fn mask_key(key: &str) -> String {
     if key.is_empty() {
         return "(not set)".into();
     }
-    let head_len = if key.starts_with("sk-") {
-        3
-    } else {
-        3.min(key.len())
-    };
-    let tail_len = 4.min(key.len().saturating_sub(head_len));
-    if head_len + tail_len >= key.len() {
-        return "•".repeat(key.len());
+    // Index by Unicode scalars so multi-byte keys cannot panic mid-char.
+    let chars: Vec<char> = key.chars().collect();
+    let head_len = 3.min(chars.len());
+    let tail_len = 4.min(chars.len().saturating_sub(head_len));
+    if head_len + tail_len >= chars.len() {
+        return "•".repeat(chars.len());
     }
-    let head = &key[..head_len];
-    let tail = &key[key.len() - tail_len..];
+    let head: String = chars[..head_len].iter().collect();
+    let tail: String = chars[chars.len() - tail_len..].iter().collect();
     format!("{head}•••{tail}")
 }
 
@@ -235,6 +233,16 @@ mod tests {
     fn mask_short_key_is_fully_dotted() {
         // 6 chars: head=3 + tail=3 = covers the whole string; render as dots.
         assert_eq!(mask_key("abc123"), "••••••");
+    }
+
+    #[test]
+    fn mask_multibyte_key_keeps_head_and_tail() {
+        assert_eq!(mask_key("a你好世界bcde"), "a你好•••bcde");
+    }
+
+    #[test]
+    fn mask_multibyte_short_key_is_fully_dotted() {
+        assert_eq!(mask_key("αβγδε"), "•••••");
     }
 
     #[test]
