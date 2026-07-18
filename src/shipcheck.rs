@@ -195,12 +195,19 @@ pub fn append_ship_context(
         return base.to_string();
     };
     let line = ship_status_one_liner(&snapshot, tests_ran_this_session);
-    let capped = if line.len() > 512 {
-        format!("{}…", &line[..509])
-    } else {
-        line
-    };
-    format!("{base}\n\n{capped}")
+    format!("{base}\n\n{}", cap_ship_status_line(&line))
+}
+
+/// Cap ship-status one-liners without slicing mid-UTF-8 character.
+fn cap_ship_status_line(line: &str) -> String {
+    if line.len() <= 512 {
+        return line.to_string();
+    }
+    let mut end = 509.min(line.len());
+    while end > 0 && !line.is_char_boundary(end) {
+        end -= 1;
+    }
+    format!("{}…", &line[..end])
 }
 
 pub fn collect_shipcheck(workspace_root: &str) -> Result<ShipcheckSnapshot> {
@@ -876,5 +883,25 @@ u UU N... 100644 100644 100644 100644 a b c src/conflict.rs
         );
         assert_eq!(snapshot.untracked_count(), 1);
         assert!(!snapshot.is_clean());
+    }
+
+    #[test]
+    fn cap_ship_status_line_keeps_short_ascii() {
+        assert_eq!(
+            cap_ship_status_line("Ship status: branch main"),
+            "Ship status: branch main"
+        );
+    }
+
+    #[test]
+    fn cap_ship_status_line_respects_utf8_boundary() {
+        // 508 ASCII bytes then a 3-byte char; old code sliced at byte 509.
+        let mut line = "x".repeat(508);
+        line.push('你');
+        line.push_str(&"y".repeat(20));
+        assert!(line.len() > 512);
+        assert!(!line.is_char_boundary(509));
+        let capped = cap_ship_status_line(&line);
+        assert_eq!(capped, format!("{}…", "x".repeat(508)));
     }
 }
