@@ -271,12 +271,17 @@ pub fn snapshot_file_into(
         return Ok(());
     }
 
-    if checkpoint.snapshot_bytes + file_len > limits.max_bytes {
+    // Avoid overflow when snapshot_bytes is near u64::MAX under a huge max_bytes.
+    let Some(new_total) = checkpoint.snapshot_bytes.checked_add(file_len) else {
+        checkpoint.skipped.push(rel_path.to_string());
+        return Ok(());
+    };
+    if new_total > limits.max_bytes {
         checkpoint.skipped.push(rel_path.to_string());
         return Ok(());
     }
 
-    checkpoint.snapshot_bytes += file_len;
+    checkpoint.snapshot_bytes = new_total;
     checkpoint.files.insert(
         rel_path.to_string(),
         FileBaseline {
@@ -692,5 +697,22 @@ mod tests {
             Path::new("/tmp"),
         )
         .is_empty());
+    }
+
+    #[test]
+    fn snapshot_bytes_near_u64_max_does_not_overflow() {
+        let dir = workspace();
+        fs::write(dir.path().join("note.txt"), "hi\n").unwrap();
+        let limits = CheckpointLimits {
+            max_turns: 10,
+            max_bytes: u64::MAX,
+            max_file_bytes: u64::MAX,
+        };
+        let mut checkpoint = TurnCheckpoint::new();
+        checkpoint.snapshot_bytes = u64::MAX - 1;
+        snapshot_file_into(&mut checkpoint, dir.path(), "note.txt", limits).unwrap();
+        assert_eq!(checkpoint.snapshot_bytes, u64::MAX - 1);
+        assert!(checkpoint.files.get("note.txt").is_none());
+        assert!(checkpoint.skipped.iter().any(|p| p == "note.txt"));
     }
 }
