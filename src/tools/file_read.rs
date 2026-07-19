@@ -121,7 +121,12 @@ impl Tool for FileReadTool {
             .map(|o| o.saturating_sub(1))
             .unwrap_or(0)
             .min(total);
-        let end = args.limit.map(|l| start + l).unwrap_or(total).min(total);
+        // Saturate like offset's saturating_sub: a huge limit means "read to EOF".
+        let end = args
+            .limit
+            .map(|l| start.saturating_add(l))
+            .unwrap_or(total)
+            .min(total);
         let slice = &lines[start..end];
         let mut obj = serde_json::Map::new();
         obj.insert("content".into(), json!(slice.join("\n")));
@@ -208,6 +213,27 @@ mod tests {
         assert_eq!(result["content"].as_str().unwrap(), "2\n3");
         assert!(result["truncated"].as_bool().unwrap());
         assert_eq!(result["nextOffset"].as_u64().unwrap(), 4);
+    }
+
+    #[tokio::test]
+    async fn huge_limit_with_offset_reads_to_eof_without_overflow() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("a.txt");
+        tokio::fs::write(&path, "1\n2\n3").await.unwrap();
+
+        let result = FileReadTool {
+            path_policy: PathPolicy::default(),
+        }
+        .execute(json!({
+            "path": path.to_str().unwrap(),
+            "offset": 2,
+            "limit": usize::MAX
+        }))
+        .await;
+
+        assert_eq!(result["content"].as_str().unwrap(), "2\n3");
+        assert_eq!(result["totalLines"].as_u64().unwrap(), 3);
+        assert!(result.get("truncated").is_none());
     }
 
     #[tokio::test]
