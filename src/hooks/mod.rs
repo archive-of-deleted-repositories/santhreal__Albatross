@@ -651,6 +651,35 @@ mod tests {
         assert_eq!(result.exit_code, Some(0));
     }
 
+    #[tokio::test]
+    async fn command_runner_rejects_timeout_sec_that_overflows_instant() {
+        let handler = HookCommandConfig {
+            command: "true".into(),
+            timeout_sec: u64::MAX,
+            command_windows: None,
+            status_message: None,
+            async_handler: false,
+            env: Default::default(),
+            env_vars: Vec::new(),
+        };
+        let payload = HookPayload::new(HookEventName::SessionStart, "s1").into_value();
+
+        let result = run_command_hook(&handler, &payload).await;
+
+        assert!(result.timed_out);
+        assert_eq!(result.failure, Some(runner::HookRunFailure::Timeout));
+        assert_eq!(result.exit_code, None);
+        let warning = result.effect.warning.as_deref().unwrap();
+        assert!(
+            warning.contains("overflows the clock"),
+            "warning was: {warning}"
+        );
+        assert!(
+            warning.contains(&u64::MAX.to_string()),
+            "warning was: {warning}"
+        );
+    }
+
     #[cfg(unix)]
     #[tokio::test]
     async fn command_runner_timeout_kills_background_process_group() {
