@@ -146,11 +146,20 @@ fn try_parse_inline_tool_call(text: &str, tool_names: &HashSet<String>) -> Optio
 }
 
 fn truncate_chars(s: &str, max: usize) -> String {
+    if max == 0 {
+        return String::new();
+    }
     if s.chars().count() <= max {
         return s.to_string();
     }
-    let mut out: String = s.chars().take(max).collect();
-    out.push_str("…[truncated]");
+    const MARKER: &str = "…[truncated]";
+    let marker_chars = MARKER.chars().count();
+    if max <= marker_chars {
+        return MARKER.chars().take(max).collect();
+    }
+    let keep = max - marker_chars;
+    let mut out: String = s.chars().take(keep).collect();
+    out.push_str(MARKER);
     out
 }
 
@@ -1137,7 +1146,24 @@ mod tests {
         let parsed: Value = serde_json::from_str(&compacted.0).unwrap();
         assert_eq!(parsed["compacted"].as_bool(), Some(true));
         assert!(parsed["content"].as_str().unwrap().contains("[truncated]"));
+        assert!(
+            parsed["content"].as_str().unwrap().chars().count() <= 4000,
+            "content field should stay within MAX_TOOL_OUTPUT_CHARS"
+        );
         assert!(compacted.1.is_some());
+    }
+
+    #[test]
+    fn plain_tool_output_truncate_stays_within_context_limit() {
+        let output = "x".repeat(5000);
+        let (compacted, info) = compact_tool_output("shell", &output);
+        assert!(info.is_some());
+        assert!(
+            compacted.chars().count() <= 4000,
+            "truncated plain output was {} chars",
+            compacted.chars().count()
+        );
+        assert!(compacted.ends_with("…[truncated]"));
     }
 
     #[test]
