@@ -1117,11 +1117,16 @@ fn push_capped(out: &mut String, line: &str, max_bytes: usize, truncated: &mut b
     const MARKER: &str = "\n[truncated]\n";
     let remaining = max_bytes.saturating_sub(out.len());
     if remaining > MARKER.len() {
+        // Byte budget (like handoff::push_limited), not a Unicode scalar count.
         let keep = remaining.saturating_sub(MARKER.len());
-        out.push_str(&line.chars().take(keep).collect::<String>());
+        let mut end = keep.min(line.len());
+        while end > 0 && !line.is_char_boundary(end) {
+            end -= 1;
+        }
+        out.push_str(&line[..end]);
         out.push_str(MARKER);
     } else if remaining > 0 {
-        out.push_str(&MARKER.chars().take(remaining).collect::<String>());
+        out.push_str(&MARKER[..remaining]);
     }
     *truncated = true;
 }
@@ -1388,6 +1393,36 @@ mod tests {
         let map = render_repo_map(&config, &index, &[], None);
         assert!(map.bytes <= 160);
         assert!(map.truncated);
+    }
+
+    #[test]
+    fn repo_map_byte_cap_counts_utf8_bytes_not_chars() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut config = config_for(dir.path());
+        // Cap must clear the ASCII header + "Notes:\n", then force truncation
+        // on a multi-byte note line. Each 😀 is 4 UTF-8 bytes / 1 scalar.
+        config.project_memory.max_injected_bytes = 96;
+        let index = ProjectIndex {
+            version: INDEX_VERSION,
+            generated_at: "now".into(),
+            workspace_root: dir.path().display().to_string(),
+            files: Vec::new(),
+            skipped: IndexSkipStats::default(),
+        };
+        let notes = vec![ProjectNote {
+            id: "n1".into(),
+            timestamp: "now".into(),
+            text: "😀".repeat(80),
+        }];
+        let map = render_repo_map(&config, &index, &notes, None);
+        assert!(map.truncated);
+        assert!(
+            map.bytes <= config.project_memory.max_injected_bytes,
+            "repo map used {} bytes, over the {}-byte injected cap",
+            map.bytes,
+            config.project_memory.max_injected_bytes
+        );
+        assert!(map.content.contains("truncated"));
     }
 
     #[test]
