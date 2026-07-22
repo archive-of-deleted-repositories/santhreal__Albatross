@@ -73,6 +73,24 @@ impl HookRunResult {
 
 pub async fn run_command_hook(handler: &HookCommandConfig, payload: &Value) -> HookRunResult {
     let start = Instant::now();
+    let timeout_secs = handler.timeout_sec.max(1);
+    let Some(deadline) = tokio::time::Instant::now().checked_add(Duration::from_secs(timeout_secs))
+    else {
+        return HookRunResult {
+            exit_code: None,
+            timed_out: true,
+            failure: Some(HookRunFailure::Timeout),
+            duration_ms: start.elapsed().as_millis(),
+            stdout: String::new(),
+            stderr: String::new(),
+            effect: HookEffect {
+                warning: Some(format!(
+                    "hook timeoutSec {timeout_secs} overflows the clock; refusing to run"
+                )),
+                ..HookEffect::default()
+            },
+        };
+    };
     let (shell, flag) = hook_shell_program_and_arg();
     let mut command = tokio::process::Command::new(shell);
     command
@@ -130,7 +148,7 @@ pub async fn run_command_hook(handler: &HookCommandConfig, payload: &Value) -> H
     let mut read_stdout = tokio::spawn(read_to_limited_buffer(stdout, stdout_buf.clone()));
     let mut read_stderr = tokio::spawn(read_to_limited_buffer(stderr, stderr_buf.clone()));
 
-    let deadline = tokio::time::Instant::now() + Duration::from_secs(handler.timeout_sec.max(1));
+
     let mut exit_code = None;
     let mut timed_out = false;
     let mut failure = None;
@@ -189,7 +207,7 @@ pub async fn run_command_hook(handler: &HookCommandConfig, payload: &Value) -> H
         if timed_out {
             push_warning(
                 &mut effect,
-                format!("hook timed out after {}s", handler.timeout_sec.max(1)),
+                format!("hook timed out after {timeout_secs}s"),
             );
         } else if failure == Some(HookRunFailure::Wait) {
             push_warning(&mut effect, "hook wait failed".to_string());
