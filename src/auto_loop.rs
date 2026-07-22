@@ -759,7 +759,10 @@ pub fn parse_duration(s: &str) -> Result<Duration> {
         .trim()
         .parse()
         .map_err(|_| anyhow!("invalid duration value '{s}'"))?;
-    Ok(Duration::from_secs(n * mult))
+    let secs = n
+        .checked_mul(mult)
+        .ok_or_else(|| anyhow!("invalid duration value '{s}'"))?;
+    Ok(Duration::from_secs(secs))
 }
 
 /// `"$2.00"`/`"2.00"`/`"2"` → dollars.
@@ -1004,6 +1007,8 @@ mod tests {
         assert!(parse_duration("").is_err());
         assert!(parse_duration("abc").is_err());
         assert!(parse_duration("5y").is_err());
+        assert!(parse_duration("6000000000000000h").is_err());
+        assert!(parse_duration("18446744073709551615m").is_err());
     }
 
     #[test]
