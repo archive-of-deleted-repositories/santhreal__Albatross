@@ -155,8 +155,11 @@ fn strip_html(html: &str) -> String {
             i += 1;
             continue;
         }
-        s.push(b as char);
-        i += 1;
+        let Some(ch) = html[i..].chars().next() else {
+            break;
+        };
+        s.push(ch);
+        i += ch.len_utf8();
     }
     let decoded = decode_entities(&s);
     collapse_whitespace(&decoded)
@@ -248,5 +251,24 @@ mod tests {
         let text = strip_html(html);
         assert!(text.contains("good"));
         assert!(!text.contains("bad"));
+    }
+
+    #[test]
+    fn preserves_non_ascii_utf8_text() {
+        let html = "<p>café · 日本語 · 😀</p>";
+        let text = strip_html(html);
+        assert_eq!(text, "café · 日本語 · 😀");
+        assert!(!text.contains('Ã'));
+        assert!(!text.contains('ð'));
+    }
+
+    #[test]
+    fn preserves_utf8_inside_and_around_tags() {
+        let html = "<div title=\"名前\">前置 <b>中間</b> 後置</div>";
+        let text = strip_html(html);
+        assert!(text.contains("前置"));
+        assert!(text.contains("中間"));
+        assert!(text.contains("後置"));
+        assert!(!text.contains('å'));
     }
 }
