@@ -1,23 +1,25 @@
 # TUI demo media
 
-Captured with [VHS](https://github.com/charmbracelet/vhs) against a local
-Ollama `qwen2.5-coder:32b` backend.
+Captured with [VHS](https://github.com/charmbracelet/vhs) against local Ollama
+`qwen2.5:32b` (base model — structured tool calls; the `qwen2.5-coder` tag
+prints tools as plain text and will not execute them).
 
-| File | What |
-|------|------|
-| `tui-banner.png` | First paint / prompt |
-| `tui-session.png` | After a `list_dir` turn |
-| `tui-help.png` | `/help` command list |
-| `tui-session.gif` | Animated session |
-| `tui-session.mp4` | Same session as video |
+| File | Used in README |
+|------|----------------|
+| `ascii-hero.png` | Top hero (ASCII banner + prompt) |
+| `agent-session.gif` / `.mp4` | Single hero video under the ASCII art |
+| `section-first-session.png` | First session (write + run mini-game) |
+| `section-agent-code.png` | First session (edit + source) |
+| `section-backends.png` | Backends (`/backend` picker) |
+| `section-tools.png` | Tools and commands (`/help`) |
+| `section-play.png` | Going further (`/play`) |
+| `section-model.png` | Configuration (`/model`) |
 
-Regenerate from the repo root (requires `vhs`, `albatross` on `PATH`, and a
-running Ollama with the model pulled):
+Regenerate from the repo root (needs `vhs`, `albatross` on `PATH`, Ollama up):
 
 ```bash
-vhs docs/tapes/tui-banner.tape
-vhs docs/tapes/tui-session.tape
+vhs docs/tapes/ascii-hero.tape
+vhs docs/tapes/agent-session.tape
 ```
 
-The tapes `cd` into a small throwaway sandbox; edit the path in the `.tape`
-files if your machine layout differs.
+Edit the sandbox `cd` path inside the `.tape` files if your layout differs.
