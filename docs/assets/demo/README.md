@@ -1,12 +1,13 @@
-# TUI demo media
+# README media
 
 | File | What |
 |------|------|
-| `agent-session.gif` | Animated session: agent writes and runs a Python mini-game |
+| `albatross-wordmark.svg` | Transparent ASCII wordmark (follows light/dark page theme) |
+| `agent-session.gif` | Looping TUI session (1s hold on the final frame) |
 | `agent-session.mp4` | Same session as video |
 
 Recorded with [VHS](https://github.com/charmbracelet/vhs) against local Ollama
-`qwen2.5:32b` (base model has structured tool calls).
+`qwen2.5:32b` using only `agent.config.json` (no env vars).
 
 ```bash
 vhs docs/tapes/agent-session.tape

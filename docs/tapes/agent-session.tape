@@ -1,72 +1,63 @@
-# Dynamic agent session with real tool calls (qwen2.5:32b)
-Output "docs/assets/demo/agent-session.gif"
-Output "docs/assets/demo/agent-session.mp4"
+# Dense Albatross TUI session (config-only, no env)
+Output "docs/assets/demo/agent-session.raw.gif"
+Output "docs/assets/demo/agent-session.raw.mp4"
 
 Set Shell "bash"
-Set FontSize 15
+Set FontSize 14
 Set FontFamily "JetBrains Mono"
-Set Width 1280
-Set Height 800
-Set Padding 12
+Set Width 1080
+Set Height 620
+Set Padding 8
 Set Theme "Catppuccin Mocha"
-Set TypingSpeed 32ms
-Set Framerate 24
-Set PlaybackSpeed 1.35
+Set TypingSpeed 12ms
+Set Framerate 30
+Set PlaybackSpeed 1.4
+Set LoopOffset 0%
 Set CursorBlink false
-
-Env ALBATROSS_NO_WIZARD "true"
-Env BACKEND "ollama"
-Env AGENT_MODEL "qwen2.5:32b"
-Env APPROVAL_POLICY "never"
-Env AGENT_TOOLS "list_dir,file_read,file_write,file_edit,shell,grep"
-Env WARMUP "false"
-Env PATH "/tmp/albatross-path:/usr/local/bin:/usr/bin:/bin"
+Set WindowBar Colorful
+Set WindowBarSize 28
+Set BorderRadius 6
 
 Hide
-Type "cd /home/mukund-thiru/oss-pr-hunt/work/albatross-vhs-sandbox && rm -f guess.py && clear"
+Type "cd /home/mukund-thiru/oss-pr-hunt/work/albatross-vhs-sandbox && clear"
 Enter
-Sleep 350ms
+Sleep 100ms
 Show
 
-Type "albatross"
+Type "/mnt/FlareTraining/santh-archive/cargo-target/release/albatross"
 Enter
-Sleep 3.5s
+Sleep 2s
 
-Type "Create guess.py: a number guessing game, random 1 to 20, loop until correct, print try count. Use file_write. Then run: printf '3\n7\n12\n15\n18\n1\n2\n4\n5\n6\n8\n9\n10\n11\n13\n14\n16\n17\n19\n20\n' | python3 guess.py"
+Type "List project files, run python3 snake_lite.py --demo, quote the score line"
 Enter
-Sleep 55s
-Screenshot "docs/assets/demo/section-first-session.png"
-Sleep 1.5s
+Sleep 18s
 
-Type "Add a colorful startup banner line to guess.py and show the first 25 lines"
+Type "Run tests/test_snake.py with pytest or a plain python assert on play demo"
 Enter
-Sleep 40s
-Screenshot "docs/assets/demo/section-agent-code.png"
-Sleep 1s
+Sleep 16s
+
+Type "Edit snake_lite.py so demo mode prints ALBATROSS SNAKE first, then re-run the demo"
+Enter
+Sleep 18s
+
+Type "Show the first 15 lines of snake_lite.py"
+Enter
+Sleep 12s
 
 Type "/help"
 Enter
-Sleep 3.5s
-Screenshot "docs/assets/demo/section-tools.png"
-Sleep 1s
+Sleep 1.4s
 
 Type "/backend"
 Enter
-Sleep 4s
-Screenshot "docs/assets/demo/section-backends.png"
-Sleep 1s
-
-Type "/model"
-Enter
-Sleep 4s
-Screenshot "docs/assets/demo/section-model.png"
-Sleep 1s
+Sleep 1.4s
+Type "q"
+Sleep 200ms
 
 Type "/play"
 Enter
-Sleep 3.5s
-Screenshot "docs/assets/demo/section-play.png"
-Sleep 1s
+Sleep 1.2s
 
+Sleep 1.4s
 Type "Ctrl+C"
-Sleep 400ms
+Sleep 120ms
