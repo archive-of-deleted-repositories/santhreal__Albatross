@@ -1,4 +1,11 @@
-<h1 align="center">Albatross</h1>
+<pre align="center">
+   █████╗ ██╗     ██████╗  █████╗ ████████╗██████╗  ██████╗ ███████╗███████╗
+  ██╔══██╗██║     ██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗██╔═══██╗██╔════╝██╔════╝
+  ███████║██║     ██████╔╝███████║   ██║   ██████╔╝██║   ██║███████╗███████╗
+  ██╔══██║██║     ██╔══██╗██╔══██║   ██║   ██╔══██╗██║   ██║╚════██║╚════██║
+  ██║  ██║███████╗██████╔╝██║  ██║   ██║   ██║  ██║╚██████╔╝███████║███████║
+  ╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝
+</pre>
 
 <p align="center">
   <strong>A small, terminal-first coding harness. Bring your own model, your own key, or your own MCP server.</strong>
@@ -27,15 +34,11 @@
 </p>
 
 <p align="center">
-  <img alt="Albatross TUI" src="docs/assets/demo/ascii-hero.png" width="920">
-</p>
-
-<p align="center">
   <img alt="Albatross writing and running a Python mini-game" src="docs/assets/demo/agent-session.gif" width="920">
 </p>
 
 <p align="center">
-  <a href="docs/assets/demo/agent-session.mp4">Full session video (mp4)</a>
+  <a href="docs/assets/demo/agent-session.mp4">Session video (mp4)</a>
 </p>
 
 ---
@@ -218,14 +221,6 @@ for their ports and start commands.
 
 ## First session
 
-<p align="center">
-  <img alt="First session: agent writes and runs guess.py" src="docs/assets/demo/section-first-session.png" width="920">
-</p>
-
-<p align="center">
-  <img alt="Agent edits guess.py and shows the source" src="docs/assets/demo/section-agent-code.png" width="920">
-</p>
-
 ```text
 > what files are in src/?
 
@@ -280,10 +275,6 @@ A handful of moves worth knowing right away:
 ---
 
 ## Backends
-
-<p align="center">
-  <img alt="Backend picker" src="docs/assets/demo/section-backends.png" width="920">
-</p>
 
 | Backend | Default URL | Notes |
 |---------|-------------|-------|
@@ -344,10 +335,6 @@ All model-tuning lives under `/doctor`:
 ---
 
 ## Tools and commands
-
-<p align="center">
-  <img alt="/help command list" src="docs/assets/demo/section-tools.png" width="920">
-</p>
 
 ### Tools
 
@@ -626,10 +613,6 @@ global quality PR scorecard.
 ---
 
 ## Going further
-
-<p align="center">
-  <img alt="/play bundled demos" src="docs/assets/demo/section-play.png" width="920">
-</p>
 
 ### Plan a feature first
 
@@ -1089,10 +1072,6 @@ the main model and prints a warning.
 ---
 
 ## Configuration
-
-<p align="center">
-  <img alt="/model picker" src="docs/assets/demo/section-model.png" width="920">
-</p>
 
 Resolution order (later overrides earlier):
 
