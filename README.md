@@ -26,6 +26,20 @@
   <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-111827">
 </p>
 
+<p align="center">
+  <img alt="Albatross TUI banner" src="docs/assets/demo/tui-banner.png" width="920">
+</p>
+
+<p align="center">
+  <img alt="Albatross TUI session" src="docs/assets/demo/tui-session.gif" width="920">
+</p>
+
+<p align="center">
+  <a href="docs/assets/demo/tui-session.mp4">Session video (mp4)</a>
+  ·
+  <a href="docs/assets/demo/tui-help.png">/help screenshot</a>
+</p>
+
 ---
 
 ## What it is
